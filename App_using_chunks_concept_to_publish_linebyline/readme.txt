@@ -1,5 +1,5 @@
 Steps to run
-First we will have to upload all the node modules required to run this application.  Look at the imported modules in main.js and look for the npm code in google to install it.
+First install all the node modules required to run this application.  Look at the imported modules in main.js and look for the npm code in google to install it.
 Then run partition to create a kafka topic
 Then run main.js to publish data to kafka topic
 
