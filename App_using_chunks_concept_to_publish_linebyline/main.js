@@ -64,7 +64,7 @@ import { Kafka } from 'kafkajs';
         for(let i=0;i<ChunkData.length;i++)
         {
             SingleMessg=SingleMessg+ChunkData[i];
-               // trying line by line by detecting a space which is not efficient as some extra messages are being created so we have to improve this code
+               // trying line by line by detecting a space which is not efficient as some extra messages are being created 
 
               if(ChunkData[i]==' ')
               {      
@@ -79,7 +79,7 @@ import { Kafka } from 'kafkajs';
                 SingleMessg=""; }
         }
         ChunkData="";
-        console.log("one chuck ended here ");
+        
       };
       
       decryptedData.data.pipe(outStream);
