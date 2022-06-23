@@ -1,7 +1,8 @@
 Steps to run
-Go to the terminal and type npm install and install azure blob modules
-Then run partition to create a kafka topic
-Then run main2.js to publish data to kafka topic
+1) Go to the terminal and type npm install
+2) install azure blob modules
+3) Then run partition to create a kafka topic
+4) Then run main2.js to publish data to kafka topic
 
 
 Basic info
