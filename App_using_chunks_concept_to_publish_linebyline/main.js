@@ -2,19 +2,24 @@ import { BlobServiceClient } from '@azure/storage-blob';
 import openpgp from 'openpgp';
 import fs, { ReadStream } from 'fs';
 // import * as readline from 'node:readline';
-import  { Writable } from 'stream';
+import { Stream } from 'stream';
 import { chunk } from 'chunk';
 import { Kafka } from 'kafkajs';
+import { Transform } from 'node:stream';
+// import { disconnect } from 'process';
 
 
 
 (async() => {
-
+    
     const kafka = new Kafka({
-        clientId: "local1",
+        clientId: "local2",
         brokers: ["127.0.0.1:9092"],
     });
 
+   
+   
+    //const stream = require('stream');
     const AZURE_STORAGE_CONNECTION_STRING = 'AccountName=devstoreaccount1;AccountKey=Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==;DefaultEndpointsProtocol=http;BlobEndpoint=http://127.0.0.1:10000/devstoreaccount1;QueueEndpoint=http://127.0.0.1:10001/devstoreaccount1;TableEndpoint=http://127.0.0.1:10002/devstoreaccount1;'
 
     const blobServiceClient = BlobServiceClient.fromConnectionString(AZURE_STORAGE_CONNECTION_STRING);
@@ -49,46 +54,45 @@ import { Kafka } from 'kafkajs';
 
     
    // code starts for producer
-
    const producer = kafka.producer();
    await producer.connect();
    console.log("Producer connected");
+
+
+   var liner = new Transform({objectmode: true});
+  
+   liner._transform = function (chunk, encoding, done) {
+    var data = chunk.toString();
+    if (this._lastLineData) data = this._lastLineData + data;
+
+    var lines = data.split('\n');
    
-    
-    const outStream = new Writable();
+   
+    this._lastLineData = lines.splice(lines.length-1,1)[0];
 
-    outStream.write = function (chunk,encoding)  {
-        //console.log(chunk.toString());
-        let ChunkData = chunk.toString();
-        let SingleMessg = "";
-        for(let i=0;i<ChunkData.length;i++)
-        {
-            SingleMessg=SingleMessg+ChunkData[i];
-               // trying line by line by detecting a space which is not efficient as some extra messages are being created 
-
-              if(ChunkData[i]==' ')
-              {      
-                producer.send({
-                    topic: 'topic1',
-                    messages: [
-                      { value: SingleMessg,
-                       partition:  0,
-                           },
-                    ],
-                  })
-                SingleMessg=""; }
-        }
-        ChunkData="";
-        
-      };
+    lines.forEach(this.push.bind(this));
+  
+    var line;
+    while (null !== (line = liner.read())) {
+        // do something with line
+        producer.send({
+            topic: 'topic2',
+            messages: [
+              { value: line,
+               partition:  0,
+                   },
+            ],
+          })
+   }
+    done();
+};
       
-      decryptedData.data.pipe(outStream);
+    decryptedData.data.pipe(liner);
+
 
       // await producer.disconnect()
 
-
 })();
-
 
 
 
