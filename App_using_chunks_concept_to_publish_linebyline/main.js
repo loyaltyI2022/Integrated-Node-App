@@ -1,7 +1,7 @@
 import { BlobServiceClient } from '@azure/storage-blob';
 import openpgp from 'openpgp';
 import fs, { ReadStream } from 'fs';
-// import * as readline from 'node:readline';
+import * as readline from 'node:readline';
 import { Stream } from 'stream';
 import { chunk } from 'chunk';
 import { Kafka } from 'kafkajs';
@@ -76,7 +76,7 @@ import { Transform } from 'node:stream';
     while (null !== (line = liner.read())) {
         // do something with line
         producer.send({
-            topic: 'topic2',
+            topic: 'topic3',
             messages: [
               { value: line,
                partition:  0,
@@ -86,14 +86,27 @@ import { Transform } from 'node:stream';
    }
     done();
 };
+liner._flush = function (done) {
+    if (this._lastLineData) this.push(this._lastLineData);
+    this._lastLineData = null;
+    var line;
+    while (null !== (line = liner.read())) {
+        // do something with line
+        producer.send({
+            topic: 'topic3',
+            messages: [
+              { value: line,
+               partition:  0,
+                   },
+            ],
+          })
+        }
+    done();
+};
       
     decryptedData.data.pipe(liner);
 
-
-      // await producer.disconnect()
+    
+    // await producer.disconnect();
 
 })();
-
-
-
-
